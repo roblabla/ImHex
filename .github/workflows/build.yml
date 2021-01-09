@@ -93,7 +93,14 @@ jobs:
           mingw-w64-${{ matrix.arch }}-freetype
 
     - name: TMATE DEBUGGING
-      uses: mxschmitt/action-tmate@v3
+      run: |
+        pacman -Sy --noconfirm tmate
+        mkdir $HOME/.ssh
+        echo -e 'y\n' | ssh-keygen -q -t rsa -N "" -f $HOME/.ssh/id_rsa
+        tmate -S /tmp/tmate.sock new-session -d
+        tmate -S /tmp/tmate.sock wait tmate-ready
+        tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}'
+        tmate -S /tmp/tmate.sock wait-for ssh-done
 
     - name: ✋ Build
       run: |
