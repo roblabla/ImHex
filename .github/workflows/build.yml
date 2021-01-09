@@ -92,26 +92,6 @@ jobs:
           mingw-w64-${{ matrix.arch }}-dlfcn
           mingw-w64-${{ matrix.arch }}-freetype
 
-    - name: TMATE DEBUGGING
-      run: |
-        pacman -Sy --noconfirm tmate mingw-w64-x86_64-jq
-        mkdir $HOME/.ssh
-        # echo -e 'y\n' | ssh-keygen -q -t rsa -N "" -f $HOME/.ssh/id_rsa
-        tmate -S /tmp/tmate.sock new-session -d
-        tmate -S /tmp/tmate.sock wait tmate-ready
-        TOKEN=$(basename $(tmate -S /tmp/tmate.sock display -p '#{tmate_web}'))
-        SSH_SESSION=$(tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}')
-        while true; do
-            echo $SSH_SESSION $TOKEN
-            if curl -L https://tmate.io/api/t/$TOKEN | jq -e '.closed == true or .closed == null'
-            then
-                echo "Session finished."
-                tmate -S /tmp/tmate.sock kill-session
-                exit 0
-            fi
-            sleep 10
-        done
-
     - name: ✋ Build
       run: |
         env
