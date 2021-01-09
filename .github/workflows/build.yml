@@ -94,7 +94,7 @@ jobs:
 
     - name: TMATE DEBUGGING
       run: |
-        pacman -Sy --noconfirm tmate jq
+        pacman -Sy --noconfirm tmate mingw-w64-x86_64-jq
         mkdir $HOME/.ssh
         # echo -e 'y\n' | ssh-keygen -q -t rsa -N "" -f $HOME/.ssh/id_rsa
         tmate -S /tmp/tmate.sock new-session -d
