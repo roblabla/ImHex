@@ -104,6 +104,7 @@ jobs:
 
     - name: ✋ Build
       run: |
+        env
         mkdir build
         cd build
         # Get path to mingw python library
