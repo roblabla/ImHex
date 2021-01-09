@@ -119,13 +119,14 @@ jobs:
         cd build
         # Get path to mingw python library
         PYTHON_LIB_NAME=$(pkg-config --libs-only-l python3 | sed 's/^-l//')
-        PYTHON_LIB_PATH=$(cygpath -w $(which lib${PYTHON_LIB_NAME}.dll))
+        PYTHON_LIB_PATH=$(cygpath -m $(which lib${PYTHON_LIB_NAME}.dll))
         echo Python_LIBRARY: $PYTHON_LIB_PATH
         cmake -G "MinGW Makefiles" \
           -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
           -DCREATE_PACKAGE=ON \
           -DPython_LIBRARY="$PYTHON_LIB_PATH" \
           ..
+        mingw32-make -j4
         cpack
 
     - name: 📦 Uploading artifact
