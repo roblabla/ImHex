@@ -92,26 +92,6 @@ jobs:
           mingw-w64-${{ matrix.arch }}-dlfcn
           mingw-w64-${{ matrix.arch }}-freetype
 
-    - name: TMATE DEBUGGING
-      run: |
-        pacman -Sy --noconfirm tmate mingw-w64-x86_64-jq
-        mkdir $HOME/.ssh
-        # echo -e 'y\n' | ssh-keygen -q -t rsa -N "" -f $HOME/.ssh/id_rsa
-        tmate -S /tmp/tmate.sock new-session -d
-        tmate -S /tmp/tmate.sock wait tmate-ready
-        TOKEN=$(basename $(tmate -S /tmp/tmate.sock display -p '#{tmate_web}'))
-        SSH_SESSION=$(tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}')
-        while true; do
-            echo $SSH_SESSION $TOKEN
-            if curl -L https://tmate.io/api/t/$TOKEN | jq -e '.closed == true or .closed == null'
-            then
-                echo "Session finished."
-                tmate -S /tmp/tmate.sock kill-session
-                exit 0
-            fi
-            sleep 10
-        done
-
     - name: ✋ Build
       run: |
         env
@@ -119,16 +99,14 @@ jobs:
         cd build
         # Get path to mingw python library
         PYTHON_LIB_NAME=$(pkg-config --libs-only-l python3 | sed 's/^-l//')
-        PYTHON_LIB_PATH=$(pkg-config --libs-only-L python3 | sed 's/^-L//')
-        PYTHON_INCLUDE_PATH=$(pkg-config --cflags-only-I python3 | sed 's/^-I//')
-        echo Python_LIBRARY: ${PYTHON_LIB_PATH}/lib${PYTHON_LIB_NAME}.dll
-        echo Python_INCLUDE_DIR: $PYTHON_INCLUDE_PATH
+        PYTHON_LIB_PATH=$(cygpath -w $(which lib${PYTHON_LIB_NAME}.dll))
+        echo Python_LIBRARY: $PYTHON_LIB_PATH
         cmake -G "MinGW Makefiles" \
           -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
-          -DPython_LIBRARY="${PYTHON_LIB_PATH}/lib${PYTHON_LIB_NAME}.dll" \
-          -DPython_INCLUDE_DIR="${PYTHON_INCLUDE_DIR}" \
+          -DPython_LIBRARY="$PYTHON_LIB_PATH" \
           ..
         cpack
+
     - name: 📦 Uploading artifact
       uses: actions/upload-artifact@v2
       with:
