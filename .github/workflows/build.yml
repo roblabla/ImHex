@@ -102,13 +102,13 @@ jobs:
         TOKEN=$(basename $(tmate -S /tmp/tmate.sock display -p '#{tmate_web}'))
         SSH_SESSION=$(tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}')
         while true; do
-            curl -L https://tmate.io/api/t/$TOKEN | jq -e '.closed == true or .closed == null'
+            echo $SSH_SESSION $TOKEN
+            curl -L https://tmate.io/api/t/$TOKEN | tee | jq -e '.closed == true or .closed == null'
             if [ "$?" -eq "0" ]; then
                 echo "Session finished."
                 tmate -S /tmp/tmate.sock kill-session
                 exit 0
             fi
-            echo $SSH_SESSION
             sleep 10
         done
 
